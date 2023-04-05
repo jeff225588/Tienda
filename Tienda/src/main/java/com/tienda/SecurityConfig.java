@@ -1,4 +1,3 @@
-
 package com.tienda;
 
 import com.tienda.service.UserService;
@@ -16,59 +15,37 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    
-    @Autowired 
-    private UserService userDetailService;
-    
-    @Bean 
-    public BCryptPasswordEncoder passwordEncoder(){
-      return new BCryptPasswordEncoder();  
-    }
-    
+    @Autowired
+    private UserService userDetailsService;
     @Bean
-    public UserService getUserService() {
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public UserService getRegistroService() {
         return new UserService();
     }
-    
     @Bean
-    DaoAuthenticationProvider authenticationProvider(){
-      DaoAuthenticationProvider daoauthenticationProvider = new DaoAuthenticationProvider();
-      daoauthenticationProvider.setPasswordEncoder(passwordEncoder());
-      daoauthenticationProvider.setUserDetailsService(getUserService());
-      return daoauthenticationProvider;
-      
-      
-      @Bean 
-      public AuthenticationSuccessHandler appAuthenticationSuccessHandler() {
+    DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
+    }
+    @Bean
+    public AuthenticationSuccessHandler appAuthenticationSuccessHandler() {
         return new AppAuthenticationSuccessHandler();
-        
+    }
+    public SecurityConfig(UserService userPrincipalDetailsService) {
+        this.userDetailsService = userPrincipalDetailsService;
+    }
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authenticationProvider());
+    }
+// metodo funciona para hacer la autenticacion del usuario 
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         
     }
-     public SecurityConfig(UserService userPrincipalDetailsService){
-         this.userDetailService = userPrincipalDetailsService;
-         
-     }
-     @Override
-     protected void configure(AuthenticationManagerBuilder auth){
-         auth.authenticationProvider(authenticationProvider());
-         
-         
-         
-         
-     }
-     
-     @Override
-     protected void configure (HttpSecurity http) throws Exception{
-        http.authorizeRequests()
-                .antMatchers("/persona"  , "/login")
-                .hasRole("Admin")
-                
-                
-               
-     }
-      
-    }
-    
-    
-    
-
+}
